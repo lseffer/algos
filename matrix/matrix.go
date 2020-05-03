@@ -8,6 +8,7 @@ import (
 type matrix interface {
 	Add(other matrix) matrix
 	AddConstant(constant float32) matrix
+	MultiplyConstant(constant float32) matrix
 	Multiply(other matrix) matrix
 	Dims() (int, int)
 	Transpose() matrix
@@ -17,7 +18,7 @@ type applier func(float32) float32
 
 // DenseMatrix is a normal matrix
 type DenseMatrix struct {
-	Rows [][]float32
+	Rows []*Vector
 }
 
 // InitializeMatrix an empty matrix of the specified size
@@ -25,22 +26,22 @@ func InitializeMatrix(rows, cols int) (*DenseMatrix, error) {
 	if rows < 1 || cols < 1 {
 		return &DenseMatrix{}, fmt.Errorf("Rows and columns must be greater than 0")
 	}
-	matrix := make([][]float32, rows)
+	var err error
+	var vec *Vector
+	matrix := make([]*Vector, rows)
 	for i := 0; i < rows; i++ {
-		matrix[i] = make([]float32, cols)
+		vec, err = InitializeVector(cols)
+		matrix[i] = vec
 	}
-	return &DenseMatrix{Rows: matrix}, nil
+	return &DenseMatrix{Rows: matrix}, err
 }
 
-// Dims get the dimensions of the matrix
+// String representation of the matrix
 func (m DenseMatrix) String() string {
-	rows, cols := m.Dims()
 	result := ""
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			result += fmt.Sprintf("| %v ", m.Rows[i][j])
-		}
-		result += "|\n"
+	for _, rowVector := range m.Rows {
+		result += rowVector.String()
+		result += "\n"
 	}
 	return result
 }
@@ -48,7 +49,7 @@ func (m DenseMatrix) String() string {
 // Dims get the dimensions of the matrix
 func (m *DenseMatrix) Dims() (int, int) {
 	thisRows := len(m.Rows)
-	thisCols := len(m.Rows[0])
+	thisCols := m.Rows[0].Size()
 	return thisRows, thisCols
 }
 
@@ -57,8 +58,8 @@ func (m *DenseMatrix) Tranpose() (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(cols, rows)
 	for rowIndex, row := range m.Rows {
-		for colIndex, element := range row {
-			result.Rows[colIndex][rowIndex] = element
+		for colIndex, element := range row.Values {
+			result.Rows[colIndex].Values[rowIndex] = element
 		}
 	}
 	return result, err
@@ -68,10 +69,10 @@ func (m *DenseMatrix) Tranpose() (*DenseMatrix, error) {
 func (m *DenseMatrix) AddConstant(constant float32) (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(rows, cols)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			result.Rows[i][j] = m.Rows[i][j] + constant
-		}
+	var vec *Vector
+	for i, rowVector := range m.Rows {
+		vec, err = rowVector.AddConstant(constant)
+		result.Rows[i] = vec
 	}
 	return result, err
 }
@@ -80,10 +81,10 @@ func (m *DenseMatrix) AddConstant(constant float32) (*DenseMatrix, error) {
 func (m *DenseMatrix) MultiplyConstant(constant float32) (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(rows, cols)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			result.Rows[i][j] = m.Rows[i][j] * constant
-		}
+	var vec *Vector
+	for i, rowVector := range m.Rows {
+		vec, err = rowVector.MultiplyConstant(constant)
+		result.Rows[i] = vec
 	}
 	return result, err
 }
@@ -92,10 +93,10 @@ func (m *DenseMatrix) MultiplyConstant(constant float32) (*DenseMatrix, error) {
 func (m *DenseMatrix) ApplyFunc(applier applier) (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(rows, cols)
-	for i := 0; i < rows; i++ {
-		for j := 0; j < cols; j++ {
-			result.Rows[i][j] = applier(m.Rows[i][j])
-		}
+	var vec *Vector
+	for i, rowVector := range m.Rows {
+		vec, err = rowVector.ApplyFunc(applier)
+		result.Rows[i] = vec
 	}
 	return result, err
 }
@@ -116,9 +117,9 @@ func (m *DenseMatrix) ReduceSum(axis int) (*DenseMatrix, error) {
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			if axis == 0 {
-				result.Rows[i][0] += m.Rows[i][j]
+				result.Rows[i].Values[0] += m.Rows[i].Values[j]
 			} else {
-				result.Rows[0][j] += m.Rows[i][j]
+				result.Rows[0].Values[j] += m.Rows[i].Values[j]
 			}
 		}
 	}
@@ -135,7 +136,7 @@ func (m *DenseMatrix) Add(other *DenseMatrix) (*DenseMatrix, error) {
 	}
 	for i := 0; i < thisRows; i++ {
 		for j := 0; j < thisCols; j++ {
-			result.Rows[i][j] = m.Rows[i][j] + other.Rows[i][j]
+			result.Rows[i].Values[j] = m.Rows[i].Values[j] + other.Rows[i].Values[j]
 		}
 	}
 	return result, err
@@ -153,7 +154,7 @@ func (m *DenseMatrix) Multiply(other *DenseMatrix) (*DenseMatrix, error) {
 	for i := 0; i < thisRows; i++ {
 		for j := 0; j < otherCols; j++ {
 			for k := 0; k < thisCols; k++ {
-				result.Rows[i][j] += m.Rows[i][k] * other.Rows[k][j]
+				result.Rows[i].Values[j] += m.Rows[i].Values[k] * other.Rows[k].Values[j]
 			}
 		}
 	}
