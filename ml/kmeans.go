@@ -55,47 +55,40 @@ func (m *KMeans) closestCentroidByRow(X *matrix.DenseMatrix) (*matrix.Vector, er
 	return result, err
 }
 
-func (m *KMeans) updateCentroids(X *matrix.DenseMatrix, closestCentroids *matrix.Vector) error {
-	_, cols := X.Dims()
-	centroidPartitionLengths := make(map[int]int)
-	var closestCentroid int
-	var centroidPartition *matrix.DenseMatrix
-	var partitionMatrix *matrix.DenseMatrix
-	var centroidPartitionReduced *matrix.Vector
-	centroidPartitionMap := make(map[int]*matrix.DenseMatrix)
-	var newCentroid *matrix.Vector
-	var partitionRows int
+func (m *KMeans) updateCentroids(X *matrix.DenseMatrix, closestCentroids *matrix.Vector, currentCentroids []*matrix.Vector) ([]*matrix.Vector, error) {
 	var err error
-	for i := range X.Rows {
-		closestCentroid = int(closestCentroids.Values[i])
-		centroidPartitionLengths[closestCentroid]++
-	}
-	for centroidIndex, partitionRows := range centroidPartitionLengths {
-		partitionMatrix, err = matrix.InitializeMatrix(partitionRows, cols)
-		centroidPartitionMap[centroidIndex] = partitionMatrix
+	var vec *matrix.Vector
+	var closestCentroid int
+	_, cols := X.Dims()
+	centroidDivisor := make(map[int]float64)
+	newCentroids := make([]*matrix.Vector, m.ClusterCount)
+	for i := range newCentroids {
+		vec, err = matrix.InitializeVector(cols)
+		newCentroids[i] = vec
 	}
 	for i, rowVector := range X.Rows {
 		closestCentroid = int(closestCentroids.Values[i])
-		centroidPartition = centroidPartitionMap[closestCentroid]
-		centroidPartition.Rows = append(centroidPartition.Rows, rowVector)
+		vec, err = rowVector.Add(newCentroids[closestCentroid])
+		newCentroids[closestCentroid] = vec
+		centroidDivisor[closestCentroid]++
 	}
-	for centroidIndex, centroidPartition := range centroidPartitionMap {
-		centroidPartition = centroidPartitionMap[centroidIndex]
-		partitionRows, _ = centroidPartition.Dims()
-		centroidPartitionReduced, err = centroidPartition.ReduceSum(1)
-		newCentroid, err = centroidPartitionReduced.MultiplyConstant(1.0 / float64(partitionRows))
-		m.centroids[centroidIndex] = newCentroid
+	for i, centroid := range newCentroids {
+		vec, err = centroid.MultiplyConstant(1.0 / centroidDivisor[i])
+		newCentroids[i] = vec
 	}
-	return err
+	return newCentroids, err
 }
 
 // Fit the Kmeans model using the naive algorithm
 func (m *KMeans) Fit(X *matrix.DenseMatrix) {
 	m.initializeCentroids(X)
+	var currentCentroids, newCentroids []*matrix.Vector
 	var closestCentroids *matrix.Vector
 	for i := 0; i < m.MaxIterations; i++ {
 		closestCentroids, _ = m.closestCentroidByRow(X)
-		m.updateCentroids(X, closestCentroids)
+		currentCentroids = m.GetCentroids()
+		newCentroids, _ = m.updateCentroids(X, closestCentroids, currentCentroids)
+		m.centroids = newCentroids
 	}
 }
 
