@@ -1,3 +1,3 @@
 package matrix
 
-type applier func(float32) float32
+type applier func(float64) float64

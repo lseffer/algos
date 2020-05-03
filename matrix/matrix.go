@@ -7,8 +7,8 @@ import (
 
 type matrix interface {
 	Add(other matrix) matrix
-	AddConstant(constant float32) matrix
-	MultiplyConstant(constant float32) matrix
+	AddConstant(constant float64) matrix
+	MultiplyConstant(constant float64) matrix
 	Multiply(other matrix) matrix
 	Dims() (int, int)
 	Transpose() matrix
@@ -64,7 +64,7 @@ func (m *DenseMatrix) Tranpose() (*DenseMatrix, error) {
 }
 
 // AddConstant add constant to all elements of matrix
-func (m *DenseMatrix) AddConstant(constant float32) (*DenseMatrix, error) {
+func (m *DenseMatrix) AddConstant(constant float64) (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(rows, cols)
 	var vec *Vector
@@ -76,7 +76,7 @@ func (m *DenseMatrix) AddConstant(constant float32) (*DenseMatrix, error) {
 }
 
 // MultiplyConstant multiply constant to all elements of matrix
-func (m *DenseMatrix) MultiplyConstant(constant float32) (*DenseMatrix, error) {
+func (m *DenseMatrix) MultiplyConstant(constant float64) (*DenseMatrix, error) {
 	rows, cols := m.Dims()
 	result, err := InitializeMatrix(rows, cols)
 	var vec *Vector
