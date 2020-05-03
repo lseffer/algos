@@ -106,16 +106,13 @@ func (m *DenseMatrix) ReduceSum(axis int) (*DenseMatrix, error) {
 		return &DenseMatrix{}, errors.New("Axis out of bounds, must be 0 or 1")
 	}
 	rows, cols := m.Dims()
-	var resultRows int
-	var resultCols int
+	var result *DenseMatrix
+	var err error
 	if axis == 0 {
-		resultRows = rows
-		resultCols = 1
+		result, err = InitializeMatrix(rows, 1)
 	} else {
-		resultRows = 1
-		resultCols = cols
+		result, err = InitializeMatrix(1, cols)
 	}
-	result, err := InitializeMatrix(resultRows, resultCols)
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			if axis == 0 {
