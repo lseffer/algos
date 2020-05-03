@@ -100,24 +100,24 @@ func (m *DenseMatrix) ApplyFunc(applier applier) (*DenseMatrix, error) {
 }
 
 // ReduceSum sum all elements in an axis and return the resulting vector
-func (m *DenseMatrix) ReduceSum(axis int) (*DenseMatrix, error) {
+func (m *DenseMatrix) ReduceSum(axis int) (*Vector, error) {
 	if axis > 1 || axis < 0 {
-		return &DenseMatrix{}, errors.New("Axis out of bounds, must be 0 or 1")
+		return &Vector{}, errors.New("Axis out of bounds, must be 0 or 1")
 	}
 	rows, cols := m.Dims()
-	var result *DenseMatrix
+	var result *Vector
 	var err error
 	if axis == 0 {
-		result, err = InitializeMatrix(rows, 1)
+		result, err = InitializeVector(rows)
 	} else {
-		result, err = InitializeMatrix(1, cols)
+		result, err = InitializeVector(cols)
 	}
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {
 			if axis == 0 {
-				result.Rows[i].Values[0] += m.Rows[i].Values[j]
+				result.Values[i] += m.Rows[i].Values[j]
 			} else {
-				result.Rows[0].Values[j] += m.Rows[i].Values[j]
+				result.Values[j] += m.Rows[i].Values[j]
 			}
 		}
 	}

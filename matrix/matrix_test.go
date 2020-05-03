@@ -86,8 +86,7 @@ func TestReduceSum(t *testing.T) {
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
 	res, _ := testMat.ReduceSum(0)
-	assert.Equal(t, []float64{3}, res.Rows[0].Values)
-	assert.Equal(t, []float64{7}, res.Rows[1].Values)
+	assert.Equal(t, []float64{3, 7}, res.Values)
 	res2, _ := testMat.ReduceSum(1)
-	assert.Equal(t, []float64{4, 6}, res2.Rows[0].Values)
+	assert.Equal(t, []float64{4, 6}, res2.Values)
 }
