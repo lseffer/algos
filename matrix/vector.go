@@ -1,7 +1,9 @@
 package matrix
 
 import (
+	"errors"
 	"fmt"
+	"math"
 )
 
 // Vector represents a vector of values
@@ -28,6 +30,43 @@ func (v Vector) String() string {
 // Size returns length of vector
 func (v Vector) Size() int {
 	return len(v.Values)
+}
+
+// EuclideanDistance calculates euclidean distance between two vectors
+func (v *Vector) EuclideanDistance(other *Vector) (float32, error) {
+	var err error
+	if v.Size() != other.Size() {
+		return -1, errors.New("Vector sizes do not match")
+	}
+	secondNeg, err := other.MultiplyConstant(-1)
+	diff, err := v.Add(secondNeg)
+	squared, err := diff.ApplyFunc(func(n float32) float32 {
+		return n * n
+	})
+	return float32(math.Sqrt(float64(squared.Sum()))), err
+}
+
+// Sum all values in vector
+func (v *Vector) Sum() float32 {
+	var sum float32
+	for _, elem := range v.Values {
+		sum += elem
+	}
+	return sum
+}
+
+// Add add constant to all elements of vector
+func (v *Vector) Add(other *Vector) (*Vector, error) {
+	var err error
+	var result *Vector
+	if v.Size() != other.Size() {
+		return result, errors.New("Vector sizes do not match")
+	}
+	result, err = InitializeVector(v.Size())
+	for i := 0; i < v.Size(); i++ {
+		result.Values[i] = v.Values[i] + other.Values[i]
+	}
+	return result, err
 }
 
 // AddConstant add constant to all elements of vector

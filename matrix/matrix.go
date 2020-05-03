@@ -14,8 +14,6 @@ type matrix interface {
 	Transpose() matrix
 }
 
-type applier func(float32) float32
-
 // DenseMatrix is a normal matrix
 type DenseMatrix struct {
 	Rows []*Vector
