@@ -7,8 +7,15 @@ import (
 )
 
 func TestInitialize(t *testing.T) {
-	_, err := InitializeMatrix(0, 0)
-	assert.Equal(t, "Rows and columns must be greater than 0", err.Error())
+	_, errInput := InitializeMatrix(-1, -1)
+	assert.Equal(t, "Rows and columns can't be negative", errInput.Error())
+	mat0, err := InitializeMatrix(0, 0)
+	assert.Nil(t, err)
+	assert.Equal(t, 0, len(mat0.Rows))
+	mat01, err01 := InitializeMatrix(1, 0)
+	assert.Nil(t, err01)
+	assert.Equal(t, 1, len(mat01.Rows))
+	assert.Equal(t, 0, len(mat01.Rows[0].Values))
 	mat, err1 := InitializeMatrix(0, 1)
 	assert.Nil(t, err1)
 	assert.Equal(t, 0, len(mat.Rows))
