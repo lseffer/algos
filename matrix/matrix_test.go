@@ -6,6 +6,18 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
+func TestInitialize(t *testing.T) {
+	_, err := InitializeMatrix(0, 0)
+	assert.Equal(t, "Rows and columns must be greater than 0", err.Error())
+	mat, err1 := InitializeMatrix(0, 1)
+	assert.Nil(t, err1)
+	assert.Equal(t, 0, len(mat.Rows))
+	mat1, err2 := InitializeMatrix(1, 1)
+	assert.Nil(t, err2)
+	assert.Equal(t, 1, len(mat1.Rows))
+	assert.Equal(t, 1, len(mat1.Rows[0].Values))
+}
+
 func TestDims(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
@@ -13,8 +25,6 @@ func TestDims(t *testing.T) {
 	rows, cols := testMat.Dims()
 	assert.Equal(t, 2, rows)
 	assert.Equal(t, 2, cols)
-	_, err := InitializeMatrix(0, 0)
-	assert.Equal(t, "Rows and columns must be greater than 0", err.Error())
 }
 func TestTranspose(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}

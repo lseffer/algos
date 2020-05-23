@@ -21,11 +21,15 @@ type DenseMatrix struct {
 
 // InitializeMatrix an empty matrix of the specified size
 func InitializeMatrix(rows, cols int) (*DenseMatrix, error) {
-	if rows < 1 || cols < 1 {
+	if rows < 1 && cols < 1 {
 		return &DenseMatrix{}, fmt.Errorf("Rows and columns must be greater than 0")
 	}
 	var err error
 	var vec *Vector
+	if rows < 1 {
+		matrix := make([]*Vector, 0)
+		return &DenseMatrix{Rows: matrix}, err
+	}
 	matrix := make([]*Vector, rows)
 	for i := 0; i < rows; i++ {
 		vec, err = InitializeVector(cols)
