@@ -50,6 +50,9 @@ func (m DenseMatrix) String() string {
 
 // Dims get the dimensions of the matrix
 func (m *DenseMatrix) Dims() (int, int) {
+	if len(m.Rows) == 0 {
+		return 0, 0
+	}
 	thisRows := len(m.Rows)
 	thisCols := m.Rows[0].Size()
 	return thisRows, thisCols
