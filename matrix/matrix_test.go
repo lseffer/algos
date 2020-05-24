@@ -110,3 +110,33 @@ func TestReduceSum(t *testing.T) {
 	res2, _ := testMat.ReduceSum(1)
 	assert.Equal(t, []float64{4, 6}, res2.Values)
 }
+func TestGetSubset(t *testing.T) {
+	var mRow1 = Vector{Values: []float64{1, 2}}
+	var mRow2 = Vector{Values: []float64{3, 4}}
+	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
+	resRows, _ := testMat.GetSubset(0, 0, 0)
+	assert.Equal(t, 1, len(resRows.Rows))
+	assert.Equal(t, []float64{1, 2}, resRows.Rows[0].Values)
+	resRows2, _ := testMat.GetSubset(1, 1, 0)
+	assert.Equal(t, 1, len(resRows2.Rows))
+	assert.Equal(t, []float64{3, 4}, resRows2.Rows[0].Values)
+	resCols, _ := testMat.GetSubset(0, 0, 1)
+	assert.Equal(t, 2, len(resCols.Rows))
+	assert.Equal(t, []float64{1}, resCols.Rows[0].Values)
+	assert.Equal(t, []float64{3}, resCols.Rows[1].Values)
+	resCols2, _ := testMat.GetSubset(1, 1, 1)
+	assert.Equal(t, 2, len(resCols2.Rows))
+	assert.Equal(t, []float64{2}, resCols2.Rows[0].Values)
+	assert.Equal(t, []float64{4}, resCols2.Rows[1].Values)
+}
+func TestGetSubsetErr(t *testing.T) {
+	var mRow1 = Vector{Values: []float64{1, 2}}
+	var mRow2 = Vector{Values: []float64{3, 4}}
+	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
+	_, errRows := testMat.GetSubset(-1, 0, 0)
+	assert.NotNil(t, errRows)
+	_, errCols := testMat.GetSubset(0, -1, 0)
+	assert.NotNil(t, errCols)
+	_, errAxis := testMat.GetSubset(0, 0, 3)
+	assert.NotNil(t, errAxis)
+}

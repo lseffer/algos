@@ -161,3 +161,32 @@ func (m *DenseMatrix) Multiply(other *DenseMatrix) (*DenseMatrix, error) {
 	}
 	return result, err
 }
+
+// GetSubset get a subset of the matrix. Axis=0 along rows, axis=1 along columns.
+func (m *DenseMatrix) GetSubset(startIndex, endIndex, axis int) (*DenseMatrix, error) {
+	if axis != 0 && axis != 1 {
+		return &DenseMatrix{Rows: nil}, errors.New("Axis can only be 0 or 1")
+	}
+	thisRows, thisCols := m.Dims()
+	if axis == 0 && (startIndex < 0 || startIndex > thisRows || endIndex < startIndex) {
+		return &DenseMatrix{Rows: nil}, fmt.Errorf("Row indices (%v, %v) out of bounds", startIndex, endIndex)
+	}
+	if axis == 1 && (startIndex < 0 || startIndex > thisCols || endIndex < startIndex) {
+		return &DenseMatrix{Rows: nil}, fmt.Errorf("Column indices (%v, %v) out of bounds", startIndex, endIndex)
+	}
+	numberElements := endIndex - startIndex + 1
+	var result *DenseMatrix
+	var err error
+	if axis == 0 {
+		result, err = InitializeMatrix(numberElements, thisCols)
+		for i := 0; i < numberElements; i++ {
+			result.Rows[0] = m.Rows[startIndex+i]
+		}
+	} else {
+		result, err = InitializeMatrix(thisRows, numberElements)
+		for i, rowVector := range m.Rows {
+			result.Rows[i].Values = rowVector.Values[startIndex : endIndex+1]
+		}
+	}
+	return result, err
+}
