@@ -1,5 +1,17 @@
 package trees
 
+import "algos/ml"
+
+type treeNode struct {
+	score         float64
+	colIndex      int
+	splitValue    float64
+	depth         int
+	majorityClass ml.ClassValue
+	left          *treeNode
+	right         *treeNode
+}
+
 type treeStack []*treeNode
 
 func (s treeStack) Size() int {
