@@ -5,23 +5,12 @@ import (
 	"algos/ml"
 )
 
-type treeNode struct {
-	score         float64
-	colIndex      int
-	splitValue    float64
-	depth         int
-	majorityClass ml.ClassValue
-	left          *treeNode
-	right         *treeNode
-}
-
 // DecisionTreeClassifier ml model
 type DecisionTreeClassifier struct {
 	maxDepth    int
 	minLeafSize int
-	criteria    splitCriteria
-	classes     []float64
 	rootNode    *treeNode
+	criteria    splitCriteria
 	splitFinder splitFinder
 }
 
@@ -45,10 +34,11 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 		return
 	}
 	s, current = s.Pop()
+	classVec, err = ml.NewClassVector(X)
+	current.majorityClass = classVec.MajorityClass
 	if current.depth+1 > m.maxDepth {
 		return
 	}
-	classVec, err = ml.NewClassVector(X)
 	splitRes, err = m.splitFinder.algorithm(X, m.criteria)
 	if err != nil {
 		return
@@ -56,7 +46,6 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	current.score = splitRes.score
 	current.colIndex = splitRes.colIndex
 	current.splitValue = splitRes.splitValue
-	current.majorityClass = classVec.MajorityClass
 	left = &treeNode{depth: current.depth + 1}
 	right = &treeNode{depth: current.depth + 1}
 	current.left = left
@@ -69,7 +58,7 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 
 func (m *DecisionTreeClassifier) predictRow(current *treeNode, row *matrix.Vector, prediction ml.ClassValue) ml.ClassValue {
 	if current.left == nil && current.right == nil {
-		return prediction
+		return current.majorityClass
 	}
 	prediction = current.majorityClass
 	if row.Values[current.colIndex] < current.splitValue {
@@ -85,7 +74,7 @@ func (m *DecisionTreeClassifier) Predict(X *matrix.DenseMatrix) (*matrix.DenseMa
 	rows, _ := X.Dims()
 	predicted, err := matrix.InitializeMatrix(rows, 1)
 	for rowIndex, rowVector := range X.Rows {
-		prediction := m.predictRow(m.rootNode, rowVector, 0.0)
+		prediction := m.predictRow(m.rootNode, rowVector, ml.ClassValue(0.0))
 		predicted.Rows[rowIndex].Values[0] = float64(prediction)
 	}
 	return predicted, err
