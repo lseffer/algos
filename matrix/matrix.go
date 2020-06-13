@@ -190,3 +190,27 @@ func (m *DenseMatrix) GetSubset(startIndex, endIndex, axis int) (*DenseMatrix, e
 	}
 	return result, err
 }
+
+// SplitMatrix split a matrix into two using a column and a value for splitting. Splits on rows
+func SplitMatrix(X *DenseMatrix, colIndex int, splitValue float64) (*DenseMatrix, *DenseMatrix, error) {
+	_, cols := X.Dims()
+	left, err1 := InitializeMatrix(0, cols)
+	right, err2 := InitializeMatrix(0, cols)
+	if err1 != nil {
+		return left, right, err1
+	}
+	if err2 != nil {
+		return left, right, err2
+	}
+	if colIndex+1 > cols {
+		return left, right, errors.New("Column split index is greater than the number of columns in the input matrix")
+	}
+	for _, row := range X.Rows {
+		if row.Values[colIndex] < splitValue {
+			left.Rows = append(left.Rows, row)
+		} else {
+			right.Rows = append(right.Rows, row)
+		}
+	}
+	return left, right, nil
+}

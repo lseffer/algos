@@ -140,3 +140,16 @@ func TestGetSubsetErr(t *testing.T) {
 	_, errAxis := testMat.GetSubset(0, 0, 3)
 	assert.NotNil(t, errAxis)
 }
+
+func TestSplit(t *testing.T) {
+	var mRow1 = Vector{Values: []float64{1, 2}}
+	var mRow2 = Vector{Values: []float64{3, 4}}
+	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
+	resLeft, resRight, err := SplitMatrix(&testMat, 0, 2.0)
+	assert.Nil(t, err)
+	assert.Equal(t, 1, len(resLeft.Rows))
+	assert.Equal(t, 1, len(resRight.Rows))
+
+	_, _, errColIndex := SplitMatrix(&testMat, 3, 2.0)
+	assert.Equal(t, "Column split index is greater than the number of columns in the input matrix", errColIndex.Error())
+}
