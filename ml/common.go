@@ -8,12 +8,9 @@ import (
 // ClassValue a single value of a class encoding, typically one of 0, 1, 3 ...
 type ClassValue float64
 
-type classes []ClassValue
-
 // ClassVector holds information about matrix containing class values
 type ClassVector struct {
 	Values        *matrix.DenseMatrix
-	Classes       classes
 	Counter       ClassCounter
 	MajorityClass ClassValue
 }
@@ -29,7 +26,6 @@ func NewClassVector(X *matrix.DenseMatrix) (ClassVector, error) {
 	classValues, err = X.GetSubset(cols-1, cols-1, 1)
 	classCounter, err = newClassCounter(classValues)
 	result.MajorityClass, err = getMajorityClass(classCounter)
-	result.Classes = getClasses(classCounter)
 	result.Values = X
 	result.Counter = classCounter
 	return result, err
@@ -37,15 +33,6 @@ func NewClassVector(X *matrix.DenseMatrix) (ClassVector, error) {
 
 // ClassCounter is a map that counts the occurences of each class
 type ClassCounter map[ClassValue]int
-
-func getClasses(classCounter ClassCounter) classes {
-	var result classes
-	result = make([]ClassValue, 1)
-	for key := range classCounter {
-		result = append(result, key)
-	}
-	return result
-}
 
 func newClassCounter(X *matrix.DenseMatrix) (ClassCounter, error) {
 	var classVal ClassValue
