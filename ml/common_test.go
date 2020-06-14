@@ -108,3 +108,41 @@ func Test_getMajorityClass(t *testing.T) {
 		})
 	}
 }
+
+func TestNewClassVector(t *testing.T) {
+	var mRow1 = matrix.Vector{Values: []float64{0, 1}}
+	var mRow2 = matrix.Vector{Values: []float64{0, 2}}
+	var mRow3 = matrix.Vector{Values: []float64{1, 2}}
+	var mRow4 = matrix.Vector{Values: []float64{0, 1}}
+	var testMat = matrix.DenseMatrix{Rows: []*matrix.Vector{&mRow1, &mRow2, &mRow3, &mRow4}}
+	result, _ := testMat.GetSubset(1, 1, 1)
+	type args struct {
+		X *matrix.DenseMatrix
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    ClassVector
+		wantErr bool
+	}{
+		{
+			name: "Normal case",
+			args: args{
+				X: &testMat,
+			},
+			want: ClassVector{Values: result, Counter: ClassCounter{1.0: 2, 2.0: 2}, MajorityClass: ClassValue(1.0)},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := NewClassVector(tt.args.X)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("NewClassVector() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("NewClassVector() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

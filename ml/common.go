@@ -3,6 +3,7 @@ package ml
 import (
 	"algos/matrix"
 	"errors"
+	"sort"
 )
 
 // ClassValue a single value of a class encoding, typically one of 0, 1, 3 ...
@@ -26,7 +27,7 @@ func NewClassVector(X *matrix.DenseMatrix) (ClassVector, error) {
 	classValues, err = X.GetSubset(cols-1, cols-1, 1)
 	classCounter, err = newClassCounter(classValues)
 	result.MajorityClass, err = getMajorityClass(classCounter)
-	result.Values = X
+	result.Values = classValues
 	result.Counter = classCounter
 	return result, err
 }
@@ -52,17 +53,26 @@ func newClassCounter(X *matrix.DenseMatrix) (ClassCounter, error) {
 	return result, nil
 }
 
+// getMajorityClass gets the class with the largest count from the classcounter map.
+// Keys will be sorted in ascending order before finding the majority class.
 func getMajorityClass(classCounter ClassCounter) (ClassValue, error) {
 	if len(classCounter) <= 0 {
 		return -1.0, errors.New("Empty classCounter map")
 	}
-	var maxKey ClassValue
+	keys := make([]float64, 0)
+	for k := range classCounter {
+		keys = append(keys, float64(k))
+	}
+	sort.Float64s(keys)
+	var maxKey float64
+	var val int
 	maxCount := 0
-	for key, val := range classCounter {
+	for _, key := range keys {
+		val = classCounter[ClassValue(key)]
 		if val > maxCount {
 			maxKey = key
 			maxCount = val
 		}
 	}
-	return maxKey, nil
+	return ClassValue(maxKey), nil
 }
