@@ -51,3 +51,60 @@ func Test_newClassCounter(t *testing.T) {
 		})
 	}
 }
+
+func Test_getMajorityClass(t *testing.T) {
+	type args struct {
+		classCounter ClassCounter
+	}
+	tests := []struct {
+		name    string
+		args    args
+		want    ClassValue
+		wantErr bool
+	}{
+		{
+			name: "normal case",
+			args: args{
+				classCounter: ClassCounter{0.0: 1, 2.0: 3},
+			},
+			want:    ClassValue(2.0),
+			wantErr: false,
+		},
+		{
+			name: "normal case 2",
+			args: args{
+				classCounter: ClassCounter{0.0: 100, 2.0: 3},
+			},
+			want:    ClassValue(0.0),
+			wantErr: false,
+		},
+		{
+			name: "counts equal, should return first",
+			args: args{
+				classCounter: ClassCounter{0.0: 3, 2.0: 3},
+			},
+			want:    ClassValue(0.0),
+			wantErr: false,
+		},
+		{
+			name: "empty counter",
+			args: args{
+				classCounter: ClassCounter{},
+			},
+			want:    -1.0,
+			wantErr: true,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got, err := getMajorityClass(tt.args.classCounter)
+			if (err != nil) != tt.wantErr {
+				t.Errorf("getMajorityClass() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+			if got != tt.want {
+				t.Errorf("getMajorityClass() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

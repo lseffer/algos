@@ -61,6 +61,7 @@ func getMajorityClass(classCounter ClassCounter) (ClassValue, error) {
 	for key, val := range classCounter {
 		if val > maxCount {
 			maxKey = key
+			maxCount = val
 		}
 	}
 	return maxKey, nil
