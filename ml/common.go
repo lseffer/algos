@@ -78,15 +78,3 @@ func getMajorityClass(classCounter ClassCounter) (ClassValue, error) {
 	}
 	return maxKey, nil
 }
-
-func uniqueItems(arr []float64) []float64 {
-	set := make(map[float64]bool)
-	var result []float64
-	for _, element := range arr {
-		if _, ok := set[element]; !ok {
-			set[element] = true
-			result = append(result, element)
-		}
-	}
-	return result
-}

@@ -4,16 +4,7 @@ import (
 	"algos/matrix"
 	"reflect"
 	"testing"
-
-	"github.com/stretchr/testify/assert"
 )
-
-func TestUniqueItems(t *testing.T) {
-	testarr := []float64{1.3, 4.0, 5.0, 1.0, 1.3, 4.0}
-	expected := []float64{1.3, 4.0, 5.0, 1.0}
-	res := uniqueItems(testarr)
-	assert.Equal(t, expected, res)
-}
 
 func Test_newClassCounter(t *testing.T) {
 	var mRow1 = matrix.Vector{Values: []float64{0}}
