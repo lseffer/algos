@@ -27,10 +27,11 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	var splitRes splitResults
 	var err error
 	var classVec ml.ClassVector
+	rows, _ := X.Dims()
 	if s.Size() <= 0 {
 		return
 	}
-	if len(X.Rows) < m.minLeafSize {
+	if rows < m.minLeafSize {
 		return
 	}
 	s, current = s.Pop()
@@ -39,7 +40,7 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	if current.depth+1 > m.maxDepth {
 		return
 	}
-	splitRes, err = m.splitFinder.algorithm(X, m.criteria)
+	splitRes, err = m.splitFinder.algorithm(X, m.criteria, 0, rows)
 	if err != nil {
 		return
 	}
