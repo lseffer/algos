@@ -1,10 +1,11 @@
 package ml
 
 import (
-	"algos/matrix"
 	"math"
 	"math/rand"
 	"time"
+
+	"github.com/lseffer/algos/pkg/matrix"
 )
 
 // KMeans ml model

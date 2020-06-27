@@ -1,9 +1,10 @@
 package ml
 
 import (
-	"algos/matrix"
 	"errors"
 	"sort"
+
+	"github.com/lseffer/algos/pkg/matrix"
 )
 
 // ClassValue a single value of a class encoding, typically one of 0, 1, 3 ...

@@ -1,9 +1,9 @@
 package trees
 
 import (
-	"algos/matrix"
 	"testing"
 
+	"github.com/lseffer/algos/pkg/matrix"
 	"github.com/stretchr/testify/assert"
 )
 

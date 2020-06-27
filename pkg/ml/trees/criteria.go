@@ -1,8 +1,9 @@
 package trees
 
 import (
-	"algos/ml"
 	"math"
+
+	"github.com/lseffer/algos/pkg/ml"
 )
 
 type splitCriteria interface {

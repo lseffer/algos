@@ -1,8 +1,9 @@
 package trees
 
 import (
-	"algos/ml"
 	"testing"
+
+	"github.com/lseffer/algos/pkg/ml"
 )
 
 func Test_entropyCriteria_formula(t *testing.T) {

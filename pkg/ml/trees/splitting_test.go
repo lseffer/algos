@@ -1,9 +1,10 @@
 package trees
 
 import (
-	"algos/matrix"
-	"algos/ml"
 	"testing"
+
+	"github.com/lseffer/algos/pkg/matrix"
+	"github.com/lseffer/algos/pkg/ml"
 )
 
 func Test_scoreSplit(t *testing.T) {

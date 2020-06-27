@@ -1,9 +1,10 @@
 package trees
 
 import (
-	"algos/matrix"
-	"algos/ml"
 	"sync"
+
+	"github.com/lseffer/algos/pkg/matrix"
+	"github.com/lseffer/algos/pkg/ml"
 )
 
 type splitResults struct {

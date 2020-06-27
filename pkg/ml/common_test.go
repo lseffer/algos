@@ -1,9 +1,10 @@
 package ml
 
 import (
-	"algos/matrix"
 	"reflect"
 	"testing"
+
+	"github.com/lseffer/algos/pkg/matrix"
 )
 
 func Test_newClassCounter(t *testing.T) {

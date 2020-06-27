@@ -1,6 +1,8 @@
 package trees
 
-import "algos/ml"
+import (
+	"github.com/lseffer/algos/pkg/ml"
+)
 
 type treeNode struct {
 	score         float64

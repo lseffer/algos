@@ -1,8 +1,8 @@
 package trees
 
 import (
-	"algos/matrix"
-	"algos/ml"
+	"github.com/lseffer/algos/pkg/matrix"
+	"github.com/lseffer/algos/pkg/ml"
 )
 
 // DecisionTreeClassifier ml model
