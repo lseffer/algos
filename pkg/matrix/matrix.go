@@ -90,6 +90,8 @@ func (m *DenseMatrix) MultiplyConstant(constant float64) (*DenseMatrix, error) {
 	return result, err
 }
 
+type applier func(float64) float64
+
 // ApplyFunc apply function to all elements of matrix
 func (m *DenseMatrix) ApplyFunc(applier applier) (*DenseMatrix, error) {
 	rows, cols := m.Dims()

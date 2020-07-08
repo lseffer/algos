@@ -6,6 +6,7 @@ import (
 )
 
 // DecisionTreeClassifier ml model
+// Initialize as a normal struct then call Fit method
 type DecisionTreeClassifier struct {
 	maxDepth    int
 	minLeafSize int

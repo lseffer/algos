@@ -19,14 +19,16 @@ type splitFinder interface {
 	algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (splitResults, error)
 }
 
-type greedySplitFinder struct{}
+// GreedySplitFinder finds the optimal split by iterating all columns and values and finding the split with lowest criteria score
+type GreedySplitFinder struct{}
 
-type concurrentSplitFinder struct {
+// ConcurrentSplitFinder makes any splitFinder run in parallel with goroutines. It also implements the splitFinder interface.
+type ConcurrentSplitFinder struct {
 	jobs int
 	s    splitFinder
 }
 
-func (f concurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults, err error) {
+func (f ConcurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults, err error) {
 	var jobs int
 	var wg sync.WaitGroup
 	rows, _ := X.Dims()
@@ -60,7 +62,7 @@ func (f concurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCr
 	return result, nil
 }
 
-func (f greedySplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (splitResults, error) {
+func (f GreedySplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (splitResults, error) {
 	var err error
 	var bestColIndex int
 	var leftClassVector, rightClassVector ml.ClassVector

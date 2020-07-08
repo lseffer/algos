@@ -34,7 +34,7 @@ func Test_scoreSplit(t *testing.T) {
 			args: args{
 				left:     testCVNormal,
 				right:    testCVNormal,
-				criteria: giniCriteria{},
+				criteria: GiniCriteria{},
 			},
 			want:    0.375,
 			wantErr: false,
@@ -44,7 +44,7 @@ func Test_scoreSplit(t *testing.T) {
 			args: args{
 				left:     testCVNormal,
 				right:    testCVEmpty,
-				criteria: giniCriteria{},
+				criteria: GiniCriteria{},
 			},
 			want:    0.375,
 			wantErr: false,
@@ -54,7 +54,7 @@ func Test_scoreSplit(t *testing.T) {
 			args: args{
 				left:     testCVEmpty,
 				right:    testCVNormal,
-				criteria: giniCriteria{},
+				criteria: GiniCriteria{},
 			},
 			want:    0.375,
 			wantErr: false,
@@ -64,7 +64,7 @@ func Test_scoreSplit(t *testing.T) {
 			args: args{
 				left:     testCVEmpty,
 				right:    testCVPerfectSplit,
-				criteria: giniCriteria{},
+				criteria: GiniCriteria{},
 			},
 			want:    0.0,
 			wantErr: false,

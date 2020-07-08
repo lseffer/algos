@@ -10,10 +10,13 @@ type splitCriteria interface {
 	formula(classCounter ml.ClassCounter, totalCount int) (float64, error)
 }
 
-type giniCriteria struct{}
-type entropyCriteria struct{}
+// GiniCriteria implements Gini Impurity
+type GiniCriteria struct{}
 
-func (c giniCriteria) formula(classCounter ml.ClassCounter, totalCount int) (float64, error) {
+// EntropyCriteria implements information gain
+type EntropyCriteria struct{}
+
+func (c GiniCriteria) formula(classCounter ml.ClassCounter, totalCount int) (float64, error) {
 	if totalCount == 0 {
 		return 0.0, nil
 	}
@@ -25,7 +28,7 @@ func (c giniCriteria) formula(classCounter ml.ClassCounter, totalCount int) (flo
 	return 1.0 - score, nil
 }
 
-func (c entropyCriteria) formula(classCounter ml.ClassCounter, totalCount int) (float64, error) {
+func (c EntropyCriteria) formula(classCounter ml.ClassCounter, totalCount int) (float64, error) {
 	if totalCount == 0 {
 		return 0.0, nil
 	}

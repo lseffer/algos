@@ -13,7 +13,7 @@ func Test_entropyCriteria_formula(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		c       entropyCriteria
+		c       EntropyCriteria
 		args    args
 		want    float64
 		wantErr bool
@@ -48,7 +48,7 @@ func Test_entropyCriteria_formula(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := entropyCriteria{}
+			c := EntropyCriteria{}
 			got, err := c.formula(tt.args.classCounter, tt.args.totalCount)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("entropyCriteria.formula() error = %v, wantErr %v", err, tt.wantErr)
@@ -68,7 +68,7 @@ func Test_giniCriteria_formula(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
-		c       giniCriteria
+		c       GiniCriteria
 		args    args
 		want    float64
 		wantErr bool
@@ -103,7 +103,7 @@ func Test_giniCriteria_formula(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := giniCriteria{}
+			c := GiniCriteria{}
 			got, err := c.formula(tt.args.classCounter, tt.args.totalCount)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("giniCriteria.formula() error = %v, wantErr %v", err, tt.wantErr)
