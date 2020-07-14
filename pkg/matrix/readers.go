@@ -28,10 +28,7 @@ func parseMatrix(stringArr [][]string) (res *DenseMatrix, err error) {
 	var parsedValue float64
 	rows := len(stringArr)
 	cols := len(stringArr[0])
-	res, err = InitializeMatrix(rows, cols)
-	if err != nil {
-		return
-	}
+	res = InitializeMatrix(rows, cols)
 	for rowIndex, row := range stringArr {
 		vec := InitializeVector(cols)
 		for colIndex, value := range row {

@@ -7,23 +7,17 @@ import (
 )
 
 func TestInitialize(t *testing.T) {
-	_, errInput := InitializeMatrix(-1, -1)
-	assert.Equal(t, "Rows and columns can't be negative", errInput.Error())
-	mat0, err := InitializeMatrix(0, 0)
-	assert.Nil(t, err)
+	mat0 := InitializeMatrix(0, 0)
 	assert.Equal(t, 0, len(mat0.Rows))
-	mat01, err01 := InitializeMatrix(1, 0)
-	assert.Nil(t, err01)
+	mat01 := InitializeMatrix(1, 0)
 	assert.Equal(t, 1, len(mat01.Rows))
 	assert.Equal(t, 0, len(mat01.Rows[0].Values))
-	mat, err1 := InitializeMatrix(0, 1)
-	assert.Nil(t, err1)
+	mat := InitializeMatrix(0, 1)
 	assert.Equal(t, 0, len(mat.Rows))
 	matRows, matCols := mat.Dims()
 	assert.Equal(t, 0, matRows)
 	assert.Equal(t, 0, matCols)
-	mat1, err2 := InitializeMatrix(1, 1)
-	assert.Nil(t, err2)
+	mat1 := InitializeMatrix(1, 1)
 	assert.Equal(t, 1, len(mat1.Rows))
 	assert.Equal(t, 1, len(mat1.Rows[0].Values))
 }
@@ -40,7 +34,7 @@ func TestTranspose(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
-	res, _ := testMat.Tranpose()
+	res := testMat.Tranpose()
 	assert.Equal(t, []float64{1, 3}, res.Rows[0].Values)
 	assert.Equal(t, []float64{2, 4}, res.Rows[1].Values)
 }
@@ -65,7 +59,7 @@ func TestAddConstant(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
-	res, _ := testMat.AddConstant(15.0)
+	res := testMat.AddConstant(15.0)
 	assert.Equal(t, []float64{16, 17}, res.Rows[0].Values)
 	assert.Equal(t, []float64{18, 19}, res.Rows[1].Values)
 }
@@ -73,7 +67,7 @@ func TestMultiplyConstant(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
-	res, _ := testMat.MultiplyConstant(10.0)
+	res := testMat.MultiplyConstant(10.0)
 	assert.Equal(t, []float64{10, 20}, res.Rows[0].Values)
 	assert.Equal(t, []float64{30, 40}, res.Rows[1].Values)
 }
@@ -90,12 +84,12 @@ func TestApplyFunc(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
-	res, _ := testMat.ApplyFunc(func(k float64) float64 {
+	res := testMat.ApplyFunc(func(k float64) float64 {
 		return k + 3
 	})
 	assert.Equal(t, []float64{4, 5}, res.Rows[0].Values)
 	assert.Equal(t, []float64{6, 7}, res.Rows[1].Values)
-	res2, _ := testMat.ApplyFunc(func(k float64) float64 {
+	res2 := testMat.ApplyFunc(func(k float64) float64 {
 		return -1
 	})
 	assert.Equal(t, []float64{-1, -1}, res2.Rows[0].Values)
@@ -141,15 +135,23 @@ func TestGetSubsetErr(t *testing.T) {
 	assert.NotNil(t, errAxis)
 }
 
+func qual0th(rowIndex int, values *Vector) bool {
+	return values.Values[0] < 2.0
+}
 func TestSplit(t *testing.T) {
 	var mRow1 = Vector{Values: []float64{1, 2}}
 	var mRow2 = Vector{Values: []float64{3, 4}}
 	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
-	resLeft, resRight, err := SplitMatrix(&testMat, 0, 2.0)
-	assert.Nil(t, err)
-	assert.Equal(t, 1, len(resLeft.Rows))
-	assert.Equal(t, 1, len(resRight.Rows))
-
-	_, _, errColIndex := SplitMatrix(&testMat, 3, 2.0)
-	assert.Equal(t, "Column split index is greater than the number of columns in the input matrix", errColIndex.Error())
+	resLeft, resRight := Split(&testMat, qual0th)
+	assert.Equal(t, 1, len(resLeft))
+	assert.Equal(t, 1, len(resRight))
+}
+func TestGetSubSetByIndex(t *testing.T) {
+	var mRow1 = Vector{Values: []float64{1, 2}}
+	var mRow2 = Vector{Values: []float64{3, 4}}
+	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2}}
+	res := GetSubSetByIndex(&testMat, []int{0, 1})
+	assert.Equal(t, &testMat, res)
+	res2 := GetSubSetByIndex(&testMat, []int{0})
+	assert.Equal(t, &DenseMatrix{Rows: []*Vector{&mRow1}}, res2)
 }
