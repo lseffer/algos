@@ -12,9 +12,9 @@ type Vector struct {
 }
 
 // InitializeVector an empty matrix of the specified size
-func InitializeVector(size int) (*Vector, error) {
+func InitializeVector(size int) *Vector {
 	values := make([]float64, size)
-	return &Vector{Values: values}, nil
+	return &Vector{Values: values}
 }
 
 // String representation of the Vector
@@ -38,9 +38,9 @@ func (v *Vector) EuclideanDistance(other *Vector) (float64, error) {
 	if v.Size() != other.Size() {
 		return -1, errors.New("Vector sizes do not match")
 	}
-	secondNeg, err := other.MultiplyConstant(-1)
+	secondNeg := other.MultiplyConstant(-1)
 	diff, err := v.Add(secondNeg)
-	squared, err := diff.ApplyFunc(func(n float64) float64 {
+	squared := diff.ApplyFunc(func(n float64) float64 {
 		return n * n
 	})
 	return float64(math.Sqrt(float64(squared.Sum()))), err
@@ -56,13 +56,11 @@ func (v *Vector) Sum() float64 {
 }
 
 // Add add constant to all elements of vector
-func (v *Vector) Add(other *Vector) (*Vector, error) {
-	var err error
-	var result *Vector
+func (v *Vector) Add(other *Vector) (result *Vector, err error) {
 	if v.Size() != other.Size() {
 		return result, errors.New("Vector sizes do not match")
 	}
-	result, err = InitializeVector(v.Size())
+	result = InitializeVector(v.Size())
 	for i := 0; i < v.Size(); i++ {
 		result.Values[i] = v.Values[i] + other.Values[i]
 	}
@@ -70,28 +68,28 @@ func (v *Vector) Add(other *Vector) (*Vector, error) {
 }
 
 // AddConstant add constant to all elements of vector
-func (v *Vector) AddConstant(constant float64) (*Vector, error) {
-	result, err := InitializeVector(v.Size())
+func (v *Vector) AddConstant(constant float64) *Vector {
+	result := InitializeVector(v.Size())
 	for i := 0; i < v.Size(); i++ {
 		result.Values[i] = v.Values[i] + constant
 	}
-	return result, err
+	return result
 }
 
 // MultiplyConstant multiply constant to all elements of matrix
-func (v *Vector) MultiplyConstant(constant float64) (*Vector, error) {
-	result, err := InitializeVector(v.Size())
+func (v *Vector) MultiplyConstant(constant float64) *Vector {
+	result := InitializeVector(v.Size())
 	for i := 0; i < v.Size(); i++ {
 		result.Values[i] = v.Values[i] * constant
 	}
-	return result, err
+	return result
 }
 
 // ApplyFunc apply function to all elements of vector
-func (v *Vector) ApplyFunc(applier applier) (*Vector, error) {
-	result, err := InitializeVector(v.Size())
+func (v *Vector) ApplyFunc(applier applier) *Vector {
+	result := InitializeVector(v.Size())
 	for i := 0; i < v.Size(); i++ {
 		result.Values[i] = applier(v.Values[i])
 	}
-	return result, err
+	return result
 }

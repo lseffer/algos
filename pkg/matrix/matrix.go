@@ -24,14 +24,13 @@ func InitializeMatrix(rows, cols int) (*DenseMatrix, error) {
 	if rows < 0 || cols < 0 {
 		return &DenseMatrix{Rows: nil}, errors.New("Rows and columns can't be negative")
 	}
-	var err error
 	var vec *Vector
 	matrix := make([]*Vector, rows)
 	for i := 0; i < rows; i++ {
-		vec, err = InitializeVector(cols)
+		vec = InitializeVector(cols)
 		matrix[i] = vec
 	}
-	return &DenseMatrix{Rows: matrix}, err
+	return &DenseMatrix{Rows: matrix}, nil
 }
 
 // String representation of the matrix
@@ -72,7 +71,7 @@ func (m *DenseMatrix) AddConstant(constant float64) (*DenseMatrix, error) {
 	result, err := InitializeMatrix(rows, cols)
 	var vec *Vector
 	for i, rowVector := range m.Rows {
-		vec, err = rowVector.AddConstant(constant)
+		vec = rowVector.AddConstant(constant)
 		result.Rows[i] = vec
 	}
 	return result, err
@@ -84,7 +83,7 @@ func (m *DenseMatrix) MultiplyConstant(constant float64) (*DenseMatrix, error) {
 	result, err := InitializeMatrix(rows, cols)
 	var vec *Vector
 	for i, rowVector := range m.Rows {
-		vec, err = rowVector.MultiplyConstant(constant)
+		vec = rowVector.MultiplyConstant(constant)
 		result.Rows[i] = vec
 	}
 	return result, err
@@ -98,7 +97,7 @@ func (m *DenseMatrix) ApplyFunc(applier applier) (*DenseMatrix, error) {
 	result, err := InitializeMatrix(rows, cols)
 	var vec *Vector
 	for i, rowVector := range m.Rows {
-		vec, err = rowVector.ApplyFunc(applier)
+		vec = rowVector.ApplyFunc(applier)
 		result.Rows[i] = vec
 	}
 	return result, err
@@ -113,9 +112,9 @@ func (m *DenseMatrix) ReduceSum(axis int) (*Vector, error) {
 	var result *Vector
 	var err error
 	if axis == 0 {
-		result, err = InitializeVector(rows)
+		result = InitializeVector(rows)
 	} else {
-		result, err = InitializeVector(cols)
+		result = InitializeVector(cols)
 	}
 	for i := 0; i < rows; i++ {
 		for j := 0; j < cols; j++ {

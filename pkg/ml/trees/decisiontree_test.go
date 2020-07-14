@@ -18,7 +18,7 @@ func TestFitPredict(t *testing.T) {
 	var mCol3 = matrix.Vector{Values: []float64{0}}
 	var mCol4 = matrix.Vector{Values: []float64{1}}
 	var expectedPrediction = matrix.DenseMatrix{Rows: []*matrix.Vector{&mCol1, &mCol2, &mCol3, &mCol4}}
-	model := DecisionTreeClassifier{maxDepth: 1, minLeafSize: 1, criteria: GiniCriteria{}, splitFinder: GreedySplitFinder{}}
+	model := decisionTree{maxDepth: 1, minLeafSize: 1, criteria: GiniCriteria{}, splitFinder: GreedySplitFinder{}}
 	model.Fit(&testMat)
 	prediction, _ := model.Predict(&testMat)
 	assert.Equal(t, expectedPrediction, *prediction)
@@ -35,7 +35,7 @@ func TestFitPredictConcurrent(t *testing.T) {
 	var mCol3 = matrix.Vector{Values: []float64{0}}
 	var mCol4 = matrix.Vector{Values: []float64{1}}
 	var expectedPrediction = matrix.DenseMatrix{Rows: []*matrix.Vector{&mCol1, &mCol2, &mCol3, &mCol4}}
-	model := DecisionTreeClassifier{maxDepth: 1, minLeafSize: 1, criteria: GiniCriteria{}, splitFinder: ConcurrentSplitFinder{jobs: 10, s: GreedySplitFinder{}}}
+	model := decisionTree{maxDepth: 1, minLeafSize: 1, criteria: GiniCriteria{}, splitFinder: ConcurrentSplitFinder{jobs: 10, s: GreedySplitFinder{}}}
 	model.Fit(&testMat)
 	prediction, _ := model.Predict(&testMat)
 	assert.Equal(t, expectedPrediction, *prediction)

@@ -5,9 +5,9 @@ import (
 	"github.com/lseffer/algos/pkg/ml"
 )
 
-// DecisionTreeClassifier ml model
-// Initialize as a normal struct then call Fit method
-type DecisionTreeClassifier struct {
+// decisionTree ml model
+// base struct for decision trees
+type decisionTree struct {
 	maxDepth    int
 	minLeafSize int
 	rootNode    *treeNode
@@ -16,14 +16,14 @@ type DecisionTreeClassifier struct {
 }
 
 // Fit the decision tree classifier. Assume the target is the last column to the right of the matrix
-func (m *DecisionTreeClassifier) Fit(X *matrix.DenseMatrix) {
+func (m *decisionTree) Fit(X *matrix.DenseMatrix) {
 	m.rootNode = &treeNode{depth: 0}
 	s := make(treeStack, 0)
 	s = s.Push(m.rootNode)
 	m.buildTree(X, s)
 }
 
-func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
+func (m *decisionTree) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	var left, right, current *treeNode
 	var splitRes splitResults
 	var err error
@@ -58,7 +58,7 @@ func (m *DecisionTreeClassifier) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	m.buildTree(splitRes.rightData, s)
 }
 
-func (m *DecisionTreeClassifier) predictRow(current *treeNode, row *matrix.Vector, prediction ml.ClassValue) ml.ClassValue {
+func (m *decisionTree) predictRow(current *treeNode, row *matrix.Vector, prediction ml.ClassValue) ml.ClassValue {
 	if current.left == nil && current.right == nil {
 		return current.majorityClass
 	}
@@ -72,7 +72,7 @@ func (m *DecisionTreeClassifier) predictRow(current *treeNode, row *matrix.Vecto
 }
 
 // Predict on data using the classifier
-func (m *DecisionTreeClassifier) Predict(X *matrix.DenseMatrix) (*matrix.DenseMatrix, error) {
+func (m *decisionTree) Predict(X *matrix.DenseMatrix) (*matrix.DenseMatrix, error) {
 	rows, _ := X.Dims()
 	predicted, err := matrix.InitializeMatrix(rows, 1)
 	for rowIndex, rowVector := range X.Rows {

@@ -16,16 +16,15 @@ type KMeans struct {
 	centroids     []*matrix.Vector
 }
 
-func (m *KMeans) initializeCentroids(X *matrix.DenseMatrix) ([]*matrix.Vector, error) {
+func (m *KMeans) initializeCentroids(X *matrix.DenseMatrix) []*matrix.Vector {
 	_, cols := X.Dims()
-	var err error
 	var vec *matrix.Vector
 	centroids := make([]*matrix.Vector, m.ClusterCount)
 	for i := range centroids {
-		vec, err = matrix.InitializeVector(cols)
+		vec = matrix.InitializeVector(cols)
 		centroids[i] = vec
 	}
-	return centroids, err
+	return centroids
 }
 
 // assignCentroids we initialize the centroids to a random row
@@ -39,10 +38,8 @@ func (m *KMeans) assignCentroids(X *matrix.DenseMatrix) {
 	}
 }
 
-func (m *KMeans) closestCentroid(vec *matrix.Vector) (int, error) {
+func (m *KMeans) closestCentroid(vec *matrix.Vector) (closest int, err error) {
 	var centroidDistance float64
-	var closest int
-	var err error
 	distance := math.Inf(0)
 	for i, centroid := range m.centroids {
 		centroidDistance, err = vec.EuclideanDistance(centroid)
@@ -58,7 +55,7 @@ func (m *KMeans) closestCentroidByRow(X *matrix.DenseMatrix) (*matrix.Vector, er
 	rows, _ := X.Dims()
 	var err error
 	var result *matrix.Vector
-	result, err = matrix.InitializeVector(rows)
+	result = matrix.InitializeVector(rows)
 	var closest int
 	for i, rowVector := range X.Rows {
 		closest, err = m.closestCentroid(rowVector)
@@ -73,7 +70,7 @@ func (m *KMeans) updateCentroids(X *matrix.DenseMatrix, closestCentroids *matrix
 	var closestCentroid int
 	var newCentroids []*matrix.Vector
 	centroidDivisor := make(map[int]float64)
-	newCentroids, err = m.initializeCentroids(X)
+	newCentroids = m.initializeCentroids(X)
 	for i, rowVector := range X.Rows {
 		closestCentroid = int(closestCentroids.Values[i])
 		vec, err = rowVector.Add(newCentroids[closestCentroid])
@@ -81,7 +78,7 @@ func (m *KMeans) updateCentroids(X *matrix.DenseMatrix, closestCentroids *matrix
 		centroidDivisor[closestCentroid]++
 	}
 	for i, centroid := range newCentroids {
-		vec, err = centroid.MultiplyConstant(1.0 / centroidDivisor[i])
+		vec = centroid.MultiplyConstant(1.0 / centroidDivisor[i])
 		newCentroids[i] = vec
 	}
 	return newCentroids, err
@@ -91,7 +88,7 @@ func (m *KMeans) updateCentroids(X *matrix.DenseMatrix, closestCentroids *matrix
 func (m *KMeans) Fit(X *matrix.DenseMatrix) {
 	var currentCentroids, newCentroids []*matrix.Vector
 	var closestCentroids *matrix.Vector
-	currentCentroids, _ = m.initializeCentroids(X)
+	currentCentroids = m.initializeCentroids(X)
 	m.centroids = currentCentroids
 	m.assignCentroids(X)
 	for i := 0; i < m.MaxIterations; i++ {
