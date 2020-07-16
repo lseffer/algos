@@ -5,30 +5,29 @@ import (
 	"github.com/lseffer/algos/pkg/ml"
 )
 
-// decisionTree ml model
+// DecisionTree ml model
 // base struct for decision trees
-type decisionTree struct {
+type DecisionTree struct {
 	maxDepth    int
 	minLeafSize int
 	rootNode    *treeNode
 	criteria    splitCriteria
 	splitFinder splitFinder
+	predictor   predictor
 }
 
 // Fit the decision tree classifier. Assume the target is the last column to the right of the matrix
-func (m *decisionTree) Fit(X *matrix.DenseMatrix) {
+func (m *DecisionTree) Fit(data ml.DataSet) {
 	m.rootNode = &treeNode{depth: 0}
 	s := make(treeStack, 0)
 	s = s.Push(m.rootNode)
-	m.buildTree(X, s)
+	m.buildTree(data, s)
 }
 
-func (m *decisionTree) buildTree(X *matrix.DenseMatrix, s treeStack) {
+func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack) {
 	var left, right, current *treeNode
 	var splitRes splitResults
-	var err error
-	var classVec ml.ClassVector
-	rows, _ := X.Dims()
+	rows, _ := data.Features.Dims()
 	if s.Size() <= 0 {
 		return
 	}
@@ -36,15 +35,11 @@ func (m *decisionTree) buildTree(X *matrix.DenseMatrix, s treeStack) {
 		return
 	}
 	s, current = s.Pop()
-	classVec, err = ml.NewClassVector(X)
-	current.majorityClass = classVec.MajorityClass
+	current.prediction = m.predictor.predict(data)
 	if current.depth+1 > m.maxDepth {
 		return
 	}
-	splitRes, err = m.splitFinder.algorithm(X, m.criteria, 0, rows)
-	if err != nil {
-		return
-	}
+	splitRes = m.splitFinder.algorithm(data, m.criteria, 0, rows)
 	current.score = splitRes.score
 	current.colIndex = splitRes.colIndex
 	current.splitValue = splitRes.splitValue
@@ -58,11 +53,11 @@ func (m *decisionTree) buildTree(X *matrix.DenseMatrix, s treeStack) {
 	m.buildTree(splitRes.rightData, s)
 }
 
-func (m *decisionTree) predictRow(current *treeNode, row *matrix.Vector, prediction ml.ClassValue) ml.ClassValue {
+func (m *DecisionTree) predictRow(current *treeNode, row *matrix.Vector, prediction ml.TargetValue) ml.TargetValue {
 	if current.left == nil && current.right == nil {
-		return current.majorityClass
+		return current.prediction
 	}
-	prediction = current.majorityClass
+	prediction = current.prediction
 	if row.Values[current.colIndex] < current.splitValue {
 		current = current.left
 		return m.predictRow(current, row, prediction)
@@ -72,12 +67,23 @@ func (m *decisionTree) predictRow(current *treeNode, row *matrix.Vector, predict
 }
 
 // Predict on data using the classifier
-func (m *decisionTree) Predict(X *matrix.DenseMatrix) (*matrix.DenseMatrix, error) {
+func (m *DecisionTree) Predict(X *matrix.DenseMatrix) *matrix.DenseMatrix {
+	initPrediction := ml.TargetValue(0.0)
 	rows, _ := X.Dims()
-	predicted, err := matrix.InitializeMatrix(rows, 1)
+	predicted := matrix.InitializeMatrix(rows, 1)
 	for rowIndex, rowVector := range X.Rows {
-		prediction := m.predictRow(m.rootNode, rowVector, ml.ClassValue(0.0))
+		prediction := m.predictRow(m.rootNode, rowVector, initPrediction)
 		predicted.Rows[rowIndex].Values[0] = float64(prediction)
 	}
-	return predicted, err
+	return predicted
+}
+
+// NewDecisionTreeClassifier create a new instance of a decision tree classifier.
+func NewDecisionTreeClassifier(maxDepth, minLeafSize int, criteria splitCriteria, splitFinder splitFinder) DecisionTree {
+	return DecisionTree{predictor: ClassificationPredictor{}, maxDepth: maxDepth, minLeafSize: minLeafSize, criteria: criteria, splitFinder: splitFinder}
+}
+
+// NewDecisionTreeRegressor create a new instance of a decision tree regressor.
+func NewDecisionTreeRegressor(maxDepth, minLeafSize int, splitFinder splitFinder) DecisionTree {
+	return DecisionTree{predictor: RegressionPredicor{}, maxDepth: maxDepth, minLeafSize: minLeafSize, criteria: MeanSquaredErrorCriteria{}, splitFinder: splitFinder}
 }

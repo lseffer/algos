@@ -1,6 +1,7 @@
 package trees
 
 import (
+	"math"
 	"sync"
 
 	"github.com/lseffer/algos/pkg/matrix"
@@ -11,12 +12,12 @@ type splitResults struct {
 	score      float64
 	colIndex   int
 	splitValue float64
-	leftData   *matrix.DenseMatrix
-	rightData  *matrix.DenseMatrix
+	leftData   ml.DataSet
+	rightData  ml.DataSet
 }
 
 type splitFinder interface {
-	algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (splitResults, error)
+	algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) splitResults
 }
 
 // GreedySplitFinder finds the optimal split by iterating all columns and values and finding the split with lowest criteria score
@@ -28,10 +29,10 @@ type ConcurrentSplitFinder struct {
 	s    splitFinder
 }
 
-func (f ConcurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults, err error) {
+func (f ConcurrentSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults) {
 	var jobs int
 	var wg sync.WaitGroup
-	rows, _ := X.Dims()
+	rows, _ := data.Features.Dims()
 	if rows <= f.jobs {
 		jobs = rows / 2
 	}
@@ -45,7 +46,7 @@ func (f ConcurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCr
 		}
 		go func(s, e int) {
 			var res splitResults
-			res, _ = f.s.algorithm(X, criteria, s, e)
+			res = f.s.algorithm(data, criteria, s, e)
 			c <- res
 			wg.Done()
 		}(i, end)
@@ -59,46 +60,53 @@ func (f ConcurrentSplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCr
 			result = res
 		}
 	}
-	return result, nil
+	return result
 }
 
-func (f GreedySplitFinder) algorithm(X *matrix.DenseMatrix, criteria splitCriteria, rowsStart, rowsEnd int) (splitResults, error) {
-	var err error
-	var bestColIndex int
-	var leftClassVector, rightClassVector ml.ClassVector
-	var left, right, bestLeft, bestRight *matrix.DenseMatrix
-	var score, bestScore, bestSplitValue float64
-	_, cols := X.Dims()
-	bestScore = 100.0
-	for _, rowVector := range X.Rows[rowsStart:rowsEnd] {
-		for colIndex, splitValue := range rowVector.Values[:cols-1] {
-			left, right, err = matrix.SplitMatrix(X, colIndex, splitValue)
-			leftClassVector, err = ml.NewClassVector(left)
-			rightClassVector, err = ml.NewClassVector(right)
-			score, err = scoreSplit(leftClassVector, rightClassVector, criteria)
+func colSplitFactory(colIndex int, splitValue float64) (res matrix.Qualifier) {
+	res = func(rowIndex int, values *matrix.Vector) bool {
+		return values.Values[colIndex] < splitValue
+	}
+	return
+}
+
+func (f GreedySplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) (res splitResults) {
+	var leftIndices, rightIndices []int
+	var left, right ml.DataSet
+	var score, bestScore float64
+	bestScore = math.Inf(1)
+	for _, rowVector := range data.Features.Rows[rowsStart:rowsEnd] {
+		for colIndex, splitValue := range rowVector.Values {
+			leftIndices, rightIndices = matrix.Split(data.Features, colSplitFactory(colIndex, splitValue))
+			left.Features = matrix.GetSubSetByIndex(data.Features, leftIndices)
+			left.Target = matrix.GetSubSetByIndex(data.Target, leftIndices)
+			right.Features = matrix.GetSubSetByIndex(data.Features, rightIndices)
+			right.Target = matrix.GetSubSetByIndex(data.Target, rightIndices)
+			score = scoreSplit(left, right, criteria)
 			if score < bestScore {
+				res = splitResults{
+					score:      score,
+					colIndex:   colIndex,
+					splitValue: splitValue,
+					leftData:   left,
+					rightData:  right,
+				}
 				bestScore = score
-				bestColIndex = colIndex
-				bestSplitValue = splitValue
-				bestLeft = left
-				bestRight = right
 			}
 		}
 	}
-	return splitResults{score: bestScore, colIndex: bestColIndex, splitValue: bestSplitValue, leftData: bestLeft, rightData: bestRight}, err
+	return res
 }
 
-func scoreSplit(left, right ml.ClassVector, criteria splitCriteria) (float64, error) {
-	var err error
-	var leftScore, rightScore float64
-	leftRows, _ := left.Values.Dims()
-	rightRows, _ := right.Values.Dims()
+func scoreSplit(left, right ml.DataSet, criteria splitCriteria) (score float64) {
+	leftRows, _ := left.Features.Dims()
+	rightRows, _ := right.Features.Dims()
 	totalRows := leftRows + rightRows
 	if totalRows <= 0.0 {
-		return 0.0, err
+		return 0.0
 	}
-	leftScore, err = scoreClassVector(left, criteria)
-	rightScore, err = scoreClassVector(right, criteria)
-	totalScore := leftScore*float64(leftRows)/float64(totalRows) + rightScore*float64(rightRows)/float64(totalRows)
-	return totalScore, err
+	leftScore := criteria.formula(left)
+	rightScore := criteria.formula(right)
+	score = leftScore*float64(leftRows)/float64(totalRows) + rightScore*float64(rightRows)/float64(totalRows)
+	return score
 }

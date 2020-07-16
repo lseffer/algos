@@ -106,14 +106,9 @@ func (m *DenseMatrix) ApplyFunc(applier applier) *DenseMatrix {
 	return result
 }
 
-// ReduceSum sum all elements in an axis and return the resulting vector
-func (m *DenseMatrix) ReduceSum(axis int) (*Vector, error) {
-	if axis > 1 || axis < 0 {
-		return &Vector{}, errors.New("Axis out of bounds, must be 0 or 1")
-	}
+// ReduceSum sum all elements in an axis and return the resulting vector. Axis=0 along columns, axis=1 along rows.
+func (m *DenseMatrix) ReduceSum(axis int) (result *Vector) {
 	rows, cols := m.Dims()
-	var result *Vector
-	var err error
 	if axis == 0 {
 		result = InitializeVector(rows)
 	} else {
@@ -128,7 +123,7 @@ func (m *DenseMatrix) ReduceSum(axis int) (*Vector, error) {
 			}
 		}
 	}
-	return result, err
+	return result
 }
 
 // Add two matrices together
@@ -216,8 +211,8 @@ func Split(X *DenseMatrix, qualifier Qualifier) (left []int, right []int) {
 func GetSubSetByIndex(X *DenseMatrix, indices []int) (res *DenseMatrix) {
 	_, cols := X.Dims()
 	res = InitializeMatrix(len(indices), cols)
-	for _, index := range indices {
-		res.Rows[index] = X.Rows[index]
+	for newIndex, originalIndex := range indices {
+		res.Rows[newIndex] = X.Rows[originalIndex]
 	}
 	return
 }
