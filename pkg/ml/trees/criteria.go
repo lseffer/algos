@@ -21,7 +21,7 @@ type MeanSquaredErrorCriteria struct{}
 
 func (c GiniCriteria) formula(data ml.DataSet) float64 {
 	classCounter := NewClassCounter(data.Target)
-	totalCount := len(classCounter)
+	totalCount := len(data.Target.Rows)
 	if totalCount == 0 {
 		return 0.0
 	}
@@ -35,7 +35,7 @@ func (c GiniCriteria) formula(data ml.DataSet) float64 {
 
 func (c EntropyCriteria) formula(data ml.DataSet) float64 {
 	classCounter := NewClassCounter(data.Target)
-	totalCount := len(classCounter)
+	totalCount := len(data.Target.Rows)
 	if totalCount == 0 {
 		return 0.0
 	}
