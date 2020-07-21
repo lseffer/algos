@@ -53,11 +53,16 @@ func (c MeanSquaredErrorCriteria) formula(data ml.DataSet) (res float64) {
 	square := func(val float64) float64 {
 		return val * val
 	}
-	sum := data.Target.ReduceSum(1).Values[0]
-	prediction := sum / float64(len(data.Target.Rows))
+	res = 0.0
+	rowsLength := len(data.Target.Rows)
+	if rowsLength == 0 {
+		return
+	}
+	sum := data.Target.ReduceSum(1).Sum()
+	prediction := sum / float64(rowsLength)
 	differences := data.Target.AddConstant(-prediction)
 	differencesSquared := differences.ApplyFunc(square)
-	differencesSquaredSum := differencesSquared.ReduceSum(1).Values[0]
-	res = differencesSquaredSum / float64(len(data.Target.Rows))
+	differencesSquaredSum := differencesSquared.ReduceSum(1).Sum()
+	res = differencesSquaredSum / float64(rowsLength)
 	return
 }

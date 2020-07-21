@@ -47,12 +47,12 @@ func (v *Vector) EuclideanDistance(other *Vector) (float64, error) {
 }
 
 // Sum all values in vector
-func (v *Vector) Sum() float64 {
-	var sum float64
+func (v *Vector) Sum() (sum float64) {
+	sum = 0.0
 	for _, elem := range v.Values {
 		sum += elem
 	}
-	return sum
+	return
 }
 
 // Add add constant to all elements of vector

@@ -127,10 +127,6 @@ func TestMeanSquaredErrorCriteria_formula(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			c := MeanSquaredErrorCriteria{}
-			if tt.name == "empty input" {
-				// Empty input should panic because we are accessing values by index.
-				defer func() { recover() }()
-			}
 			if gotRes := c.formula(tt.args.data); gotRes != tt.wantRes {
 				t.Errorf("MeanSquaredErrorCriteria.formula() = %v, want %v", gotRes, tt.wantRes)
 			}
