@@ -1,6 +1,7 @@
 package trees
 
 import (
+	"log"
 	"math"
 	"sync"
 
@@ -25,15 +26,15 @@ type GreedySplitFinder struct{}
 
 // ConcurrentSplitFinder makes any splitFinder run in parallel with goroutines. It also implements the splitFinder interface.
 type ConcurrentSplitFinder struct {
-	jobs int
-	s    splitFinder
+	Jobs        int
+	SplitFinder splitFinder
 }
 
 func (f ConcurrentSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults) {
-	var jobs int
+	jobs := f.Jobs
 	var wg sync.WaitGroup
 	rows, _ := data.Features.Dims()
-	if rows <= f.jobs {
+	if rows <= f.Jobs {
 		jobs = rows / 2
 	}
 	wg.Add(jobs)
@@ -46,14 +47,14 @@ func (f ConcurrentSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria
 		}
 		go func(s, e int) {
 			var res splitResults
-			res = f.s.algorithm(data, criteria, s, e)
+			res = f.SplitFinder.algorithm(data, criteria, s, e)
 			c <- res
 			wg.Done()
 		}(i, end)
 	}
 	wg.Wait()
 	close(c)
-	bestScore := 100.0
+	bestScore := math.Inf(1)
 	for res := range c {
 		if res.score < bestScore {
 			bestScore = res.score
@@ -75,7 +76,10 @@ func (f GreedySplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, ro
 	var left, right ml.DataSet
 	var score, bestScore float64
 	bestScore = math.Inf(1)
-	for _, rowVector := range data.Features.Rows[rowsStart:rowsEnd] {
+	for rowIndex, rowVector := range data.Features.Rows[rowsStart:rowsEnd] {
+		if rowIndex%10 == 0 {
+			log.Printf("GreedySplitFinder: processing %v", rowIndex)
+		}
 		for colIndex, splitValue := range rowVector.Values {
 			leftIndices, rightIndices = matrix.Split(data.Features, colSplitFactory(colIndex, splitValue))
 			left.Features = matrix.GetSubSetByIndex(data.Features, leftIndices)
