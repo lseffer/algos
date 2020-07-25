@@ -95,7 +95,7 @@ func TestSplitFinder_algorithm(t *testing.T) {
 		},
 		{
 			name: "Same test as above, but now we try it with the concurrent splitfinder wrapping the greedy one",
-			f:    ConcurrentSplitFinder{Jobs: 2, SplitFinder: GreedySplitFinder{}},
+			f:    ConcurrentSplitFinder{jobs: 2, s: GreedySplitFinder{}},
 			args: args{
 				data:      mltest.DataSampleEvenSpread(),
 				criteria:  GiniCriteria{},

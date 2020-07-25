@@ -30,16 +30,15 @@ func parseMatrix(stringArr [][]string) (res *DenseMatrix, err error) {
 	cols := len(stringArr[0])
 	res = InitializeMatrix(rows, cols)
 	for rowIndex, row := range stringArr {
+		vec := InitializeVector(cols)
 		for colIndex, value := range row {
 			parsedValue, err = strconv.ParseFloat(value, 64)
 			if err != nil {
 				return
 			}
-			res.Rows[rowIndex].Values[colIndex] = parsedValue
+			vec.Values[colIndex] = parsedValue
 		}
-		if rowIndex%10000 == 0.0 {
-			log.Printf("Processed %v rows", rowIndex)
-		}
+		res.Rows[rowIndex] = vec
 	}
 	return
 }

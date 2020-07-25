@@ -16,7 +16,7 @@ type DecisionTree struct {
 	predictor   predictor
 }
 
-// Fit the decision tree
+// Fit the decision tree classifier. Assume the target is the last column to the right of the matrix
 func (m *DecisionTree) Fit(data ml.DataSet) {
 	m.rootNode = &treeNode{depth: 0}
 	s := make(treeStack, 0)

@@ -17,7 +17,7 @@ func TestFitPredict(t *testing.T) {
 
 func TestFitPredictConcurrent(t *testing.T) {
 	testdata := mltest.DataSample()
-	model := NewDecisionTreeClassifier(1, 1, GiniCriteria{}, ConcurrentSplitFinder{Jobs: 10, SplitFinder: GreedySplitFinder{}})
+	model := NewDecisionTreeClassifier(1, 1, GiniCriteria{}, ConcurrentSplitFinder{jobs: 10, s: GreedySplitFinder{}})
 	model.Fit(testdata)
 	prediction := model.Predict(testdata.Features)
 	assert.Equal(t, testdata.Target, prediction)
@@ -25,7 +25,7 @@ func TestFitPredictConcurrent(t *testing.T) {
 
 func TestFitPredictConcurrentRegression(t *testing.T) {
 	testdata := mltest.DataSample()
-	model := NewDecisionTreeRegressor(1, 1, ConcurrentSplitFinder{Jobs: 10, SplitFinder: GreedySplitFinder{}})
+	model := NewDecisionTreeRegressor(1, 1, ConcurrentSplitFinder{jobs: 10, s: GreedySplitFinder{}})
 	model.Fit(testdata)
 	prediction := model.Predict(testdata.Features)
 	assert.Equal(t, testdata.Target, prediction)

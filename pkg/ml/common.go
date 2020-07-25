@@ -24,16 +24,16 @@ func NewDataSetNoTarget(X *matrix.DenseMatrix) (result *DataSet) {
 }
 
 // NewDataSet create a new dataset from a matrix and a vector
-func NewDataSet(X *matrix.DenseMatrix, y *matrix.DenseMatrix) (result DataSet, err error) {
+func NewDataSet(X *matrix.DenseMatrix, y *matrix.DenseMatrix) (result *DataSet, err error) {
 	xRows, _ := X.Dims()
 	yRows, yCols := y.Dims()
 	if yCols != 1 {
-		return DataSet{}, errors.New("y must be a 1 dimensional matrix, i.e. a column vector")
+		return nil, errors.New("y must be a 1 dimensional matrix, i.e. a column vector")
 	}
 	if yRows != xRows {
-		return DataSet{}, errors.New("X and y must have the same number of rows")
+		return nil, errors.New("X and y must have the same number of rows")
 	}
-	result = DataSet{Features: X, Target: y}
+	result = &DataSet{Features: X, Target: y}
 	return
 }
 
