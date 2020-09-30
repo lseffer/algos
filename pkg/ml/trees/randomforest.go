@@ -21,7 +21,7 @@ type RandomForest struct {
 func (m *RandomForest) Fit(data ml.DataSet) {
 	m.trees = make([]DecisionTree, m.numberOfEstimators)
 	for i := 0; i < m.numberOfEstimators; i++ {
-		model := DecisionTree{predictor: m.predictor, maxDepth: m.maxDepth, minLeafSize: m.minLeafSize, criteria: m.criteria, splitFinder: m.splitFinder, useBagging: true}
+		model := DecisionTree{predictor: m.predictor, maxDepth: m.maxDepth, minLeafSize: m.minLeafSize, criteria: m.criteria, splitFinder: m.splitFinder, useBagging: true, randomSubspace: true}
 		model.Fit(data)
 		m.trees[i] = model
 	}

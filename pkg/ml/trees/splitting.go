@@ -23,6 +23,10 @@ type splitFinder interface {
 // GreedySplitFinder finds the optimal split by iterating all columns and values and finding the split with lowest criteria score
 type GreedySplitFinder struct{}
 
+// RandomizedSplitFinder finds a split by randomizing over a feature's range of values instead of going through each one
+// Using it yields the ExtraTrees algorithm
+type RandomizedSplitFinder struct{}
+
 // ConcurrentSplitFinder makes any splitFinder run in parallel with goroutines. It also implements the splitFinder interface.
 type ConcurrentSplitFinder struct {
 	jobs int

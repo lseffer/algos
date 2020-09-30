@@ -11,13 +11,14 @@ import (
 // DecisionTree ml model
 // base struct for decision trees
 type DecisionTree struct {
-	maxDepth    int
-	minLeafSize int
-	rootNode    *treeNode
-	criteria    splitCriteria
-	splitFinder splitFinder
-	predictor   predictor
-	useBagging  bool
+	maxDepth       int
+	minLeafSize    int
+	rootNode       *treeNode
+	criteria       splitCriteria
+	splitFinder    splitFinder
+	predictor      predictor
+	useBagging     bool
+	randomSubspace bool
 }
 
 // Fit the decision tree
@@ -25,15 +26,15 @@ func (m *DecisionTree) Fit(data ml.DataSet) {
 	m.rootNode = &treeNode{depth: 0}
 	s := make(treeStack, 0)
 	s = s.Push(m.rootNode)
-	m.buildTree(data, s, m.useBagging)
+	m.buildTree(data, s, m.useBagging, m.randomSubspace)
 }
 
-func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool) {
+func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool, randomSubspace bool) {
 	var left, right, current *treeNode
 	var splitRes splitResults
 	var dataForSplit ml.DataSet
 	rows, cols := data.Features.Dims()
-	heuristicBagSize := int(math.Floor(math.Sqrt(float64(cols))))
+	randomSubspaceSize := int(math.Floor(math.Sqrt(float64(cols))))
 	if s.Size() <= 0 {
 		return
 	}
@@ -45,14 +46,21 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool) {
 	if current.depth+1 > m.maxDepth {
 		return
 	}
-	if bagging {
-		colIndices := make([]int, heuristicBagSize)
+	dataForSplit = data
+	if randomSubspace {
+		colIndices := make([]int, randomSubspaceSize)
 		for idx := range colIndices {
 			colIndices[idx] = rand.Intn(cols)
 		}
 		dataForSplit = ml.DataSet{Features: matrix.GetSubSetByColIndex(data.Features, colIndices), Target: data.Target}
-	} else {
-		dataForSplit = data
+	}
+	if bagging {
+		rowIndices := make([]int, rows)
+		for idx := range rowIndices {
+			rowIndices[idx] = rand.Intn(rows)
+		}
+		dataForSplit = ml.DataSet{Features: matrix.GetSubSetByIndex(data.Features, rowIndices), Target: data.Target}
+
 	}
 	splitRes = m.splitFinder.algorithm(dataForSplit, m.criteria, 0, rows)
 	current.score = splitRes.score
@@ -63,9 +71,9 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool) {
 	current.left = left
 	current.right = right
 	s = s.Push(left)
-	m.buildTree(splitRes.leftData, s, m.useBagging)
+	m.buildTree(splitRes.leftData, s, m.useBagging, m.randomSubspace)
 	s = s.Push(right)
-	m.buildTree(splitRes.rightData, s, m.useBagging)
+	m.buildTree(splitRes.rightData, s, m.useBagging, m.randomSubspace)
 }
 
 func (m *DecisionTree) predictRow(current *treeNode, row *matrix.Vector, prediction ml.TargetValue) ml.TargetValue {
