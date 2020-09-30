@@ -1,6 +1,9 @@
 package trees
 
 import (
+	"math"
+	"math/rand"
+
 	"github.com/lseffer/algos/pkg/matrix"
 	"github.com/lseffer/algos/pkg/ml"
 )
@@ -14,20 +17,23 @@ type DecisionTree struct {
 	criteria    splitCriteria
 	splitFinder splitFinder
 	predictor   predictor
+	useBagging  bool
 }
 
-// Fit the decision tree classifier. Assume the target is the last column to the right of the matrix
+// Fit the decision tree
 func (m *DecisionTree) Fit(data ml.DataSet) {
 	m.rootNode = &treeNode{depth: 0}
 	s := make(treeStack, 0)
 	s = s.Push(m.rootNode)
-	m.buildTree(data, s)
+	m.buildTree(data, s, m.useBagging)
 }
 
-func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack) {
+func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool) {
 	var left, right, current *treeNode
 	var splitRes splitResults
-	rows, _ := data.Features.Dims()
+	var dataForSplit ml.DataSet
+	rows, cols := data.Features.Dims()
+	heuristicBagSize := int(math.Floor(math.Sqrt(float64(cols))))
 	if s.Size() <= 0 {
 		return
 	}
@@ -39,7 +45,16 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack) {
 	if current.depth+1 > m.maxDepth {
 		return
 	}
-	splitRes = m.splitFinder.algorithm(data, m.criteria, 0, rows)
+	if bagging {
+		colIndices := make([]int, heuristicBagSize)
+		for idx := range colIndices {
+			colIndices[idx] = rand.Intn(cols)
+		}
+		dataForSplit = ml.DataSet{Features: matrix.GetSubSetByColIndex(data.Features, colIndices), Target: data.Target}
+	} else {
+		dataForSplit = data
+	}
+	splitRes = m.splitFinder.algorithm(dataForSplit, m.criteria, 0, rows)
 	current.score = splitRes.score
 	current.colIndex = splitRes.colIndex
 	current.splitValue = splitRes.splitValue
@@ -48,9 +63,9 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack) {
 	current.left = left
 	current.right = right
 	s = s.Push(left)
-	m.buildTree(splitRes.leftData, s)
+	m.buildTree(splitRes.leftData, s, m.useBagging)
 	s = s.Push(right)
-	m.buildTree(splitRes.rightData, s)
+	m.buildTree(splitRes.rightData, s, m.useBagging)
 }
 
 func (m *DecisionTree) predictRow(current *treeNode, row *matrix.Vector, prediction ml.TargetValue) ml.TargetValue {

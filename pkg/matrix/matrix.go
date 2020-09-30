@@ -216,3 +216,11 @@ func GetSubSetByIndex(X *DenseMatrix, indices []int) (res *DenseMatrix) {
 	}
 	return
 }
+
+// GetSubSetByColIndex create a new matrix from a subset of indices
+func GetSubSetByColIndex(X *DenseMatrix, indices []int) (res *DenseMatrix) {
+	Xnew := X.Tranpose()
+	tempRes := GetSubSetByIndex(Xnew, indices)
+	res = tempRes.Tranpose()
+	return
+}

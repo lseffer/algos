@@ -15,6 +15,15 @@ func TestFitPredict(t *testing.T) {
 	assert.Equal(t, testdata.Target, prediction)
 }
 
+func TestFitPredictBag(t *testing.T) {
+	// Bagging is not guaranteed to always give perfect results, so we only test it compiles and runs.
+	testdata := mltest.DataSample()
+	model := NewDecisionTreeClassifier(1, 1, GiniCriteria{}, GreedySplitFinder{})
+	model.useBagging = true
+	model.Fit(testdata)
+	model.Predict(testdata.Features)
+}
+
 func TestFitPredictConcurrent(t *testing.T) {
 	testdata := mltest.DataSample()
 	model := NewDecisionTreeClassifier(1, 1, GiniCriteria{}, ConcurrentSplitFinder{jobs: 10, s: GreedySplitFinder{}})
