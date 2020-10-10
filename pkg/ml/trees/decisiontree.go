@@ -33,6 +33,7 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool, ran
 	var left, right, current *treeNode
 	var splitRes splitResults
 	var dataForSplit ml.DataSet
+	var colIndices []int
 	rows, cols := data.Features.Dims()
 	randomSubspaceSize := int(math.Floor(math.Sqrt(float64(cols))))
 	if s.Size() <= 0 {
@@ -48,7 +49,7 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool, ran
 	}
 	dataForSplit = data
 	if randomSubspace {
-		colIndices := make([]int, randomSubspaceSize)
+		colIndices = make([]int, randomSubspaceSize)
 		for idx := range colIndices {
 			colIndices[idx] = rand.Intn(cols)
 		}
@@ -63,6 +64,10 @@ func (m *DecisionTree) buildTree(data ml.DataSet, s treeStack, bagging bool, ran
 
 	}
 	splitRes = m.splitFinder.algorithm(dataForSplit, m.criteria, 0, rows)
+	if randomSubspace {
+		// We need to map the subspace column index back to the original dataset index
+		splitRes.colIndex = colIndices[splitRes.colIndex]
+	}
 	current.score = splitRes.score
 	current.colIndex = splitRes.colIndex
 	current.splitValue = splitRes.splitValue
