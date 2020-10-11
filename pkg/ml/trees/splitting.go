@@ -1,7 +1,6 @@
 package trees
 
 import (
-	"fmt"
 	"math"
 	"math/rand"
 	"sync"
@@ -116,7 +115,6 @@ func (f RandomizedSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria
 
 	for colIndex := 0; colIndex < cols; colIndex++ {
 		splitValue = float64(minArray[colIndex]) + rand.Float64()*float64(maxArray[colIndex]-minArray[colIndex])
-		fmt.Println("Proposed random split:", splitValue)
 		leftIndices, rightIndices = matrix.Split(data.Features, colSplitFactory(colIndex, splitValue))
 		left.Features = matrix.GetSubSetByIndex(data.Features, leftIndices)
 		left.Target = matrix.GetSubSetByIndex(data.Target, leftIndices)

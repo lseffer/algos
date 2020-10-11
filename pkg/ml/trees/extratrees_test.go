@@ -7,9 +7,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestRandomForestClassifierFitPredict(t *testing.T) {
+func TestExtraTreesClassifierFitPredict(t *testing.T) {
 	testdata := mltest.DataSample()
-	model := NewRandomForestClassifier(1, 1, GiniCriteria{}, GreedySplitFinder{}, 10)
+	model := NewExtraTreesClassifier(1, 1, GiniCriteria{}, 10)
 	model.Fit(testdata)
 	for _, tree := range model.trees {
 		assert.NotNil(t, tree.rootNode)
@@ -18,9 +18,9 @@ func TestRandomForestClassifierFitPredict(t *testing.T) {
 	model.Predict(testdata.Features)
 }
 
-func TestRandomForestRegressorFitPredict(t *testing.T) {
+func TestExtraTreesRegressorFitPredict(t *testing.T) {
 	testdata := mltest.DataSample()
-	model := NewRandomForestRegressor(1, 1, GreedySplitFinder{}, 10)
+	model := NewExtraTreesRegressor(1, 1, 10)
 	model.Fit(testdata)
 	for _, tree := range model.trees {
 		assert.NotNil(t, tree.rootNode)

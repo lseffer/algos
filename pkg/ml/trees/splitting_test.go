@@ -116,17 +116,19 @@ func TestSplitFinder_algorithm(t *testing.T) {
 				rowsStart: 0,
 				rowsEnd:   4,
 			},
-			wantRes: res{
-				colIndex:   0,
-				splitValue: 5.92,
-			},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			gotScore := tt.f.algorithm(tt.args.data, tt.args.criteria, tt.args.rowsStart, tt.args.rowsEnd)
-			assert.InDelta(t, tt.wantRes.splitValue, gotScore.splitValue, 0.01)
-			assert.Equal(t, tt.wantRes.colIndex, gotScore.colIndex)
+			if _, ok := tt.f.(RandomizedSplitFinder); ok {
+				assert.GreaterOrEqual(t, gotScore.colIndex, 0)
+				assert.GreaterOrEqual(t, gotScore.score, 0.0)
+				assert.GreaterOrEqual(t, gotScore.splitValue, 0.0)
+			} else {
+				assert.Equal(t, tt.wantRes.colIndex, gotScore.colIndex)
+				assert.InDelta(t, tt.wantRes.splitValue, gotScore.splitValue, 0.01)
+			}
 		})
 	}
 }
