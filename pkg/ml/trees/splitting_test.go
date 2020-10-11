@@ -107,16 +107,26 @@ func TestSplitFinder_algorithm(t *testing.T) {
 				splitValue: 4.0,
 			},
 		},
+		{
+			name: "Test that the randomized split finder works as it should",
+			f:    RandomizedSplitFinder{},
+			args: args{
+				data:      mltest.DataSampleEvenSpread(),
+				criteria:  GiniCriteria{},
+				rowsStart: 0,
+				rowsEnd:   4,
+			},
+			wantRes: res{
+				colIndex:   0,
+				splitValue: 5.92,
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f := GreedySplitFinder{}
-			gotRes := f.algorithm(tt.args.data, tt.args.criteria, tt.args.rowsStart, tt.args.rowsEnd)
-			assert.Equal(t, 0, gotRes.colIndex)
-			assert.Equal(t, 4.0, gotRes.splitValue)
-			if gotScore := f.algorithm(tt.args.data, tt.args.criteria, tt.args.rowsStart, tt.args.rowsEnd); gotScore.colIndex != tt.wantRes.colIndex || gotScore.splitValue != tt.wantRes.splitValue {
-				t.Errorf("scoreSplit() = %v, want %v", gotScore, tt.wantRes)
-			}
+			gotScore := tt.f.algorithm(tt.args.data, tt.args.criteria, tt.args.rowsStart, tt.args.rowsEnd)
+			assert.InDelta(t, tt.wantRes.splitValue, gotScore.splitValue, 0.01)
+			assert.Equal(t, tt.wantRes.colIndex, gotScore.colIndex)
 		})
 	}
 }

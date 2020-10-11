@@ -1,7 +1,9 @@
 package trees
 
 import (
+	"fmt"
 	"math"
+	"math/rand"
 	"sync"
 
 	"github.com/lseffer/algos/pkg/matrix"
@@ -34,7 +36,7 @@ type ConcurrentSplitFinder struct {
 }
 
 func (f ConcurrentSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) (result splitResults) {
-	var jobs int
+	jobs := f.jobs
 	var wg sync.WaitGroup
 	rows, _ := data.Features.Dims()
 	if rows <= f.jobs {
@@ -100,6 +102,39 @@ func (f GreedySplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, ro
 		}
 	}
 	return res
+}
+
+func (f RandomizedSplitFinder) algorithm(data ml.DataSet, criteria splitCriteria, rowsStart, rowsEnd int) (res splitResults) {
+	var splitValue float64
+	var leftIndices, rightIndices []int
+	var left, right ml.DataSet
+	var score, bestScore float64
+	bestScore = math.Inf(1)
+	_, cols := data.Features.Dims()
+
+	minArray, maxArray := data.Features.MinMax()
+
+	for colIndex := 0; colIndex < cols; colIndex++ {
+		splitValue = float64(minArray[colIndex]) + rand.Float64()*float64(maxArray[colIndex]-minArray[colIndex])
+		fmt.Println("Proposed random split:", splitValue)
+		leftIndices, rightIndices = matrix.Split(data.Features, colSplitFactory(colIndex, splitValue))
+		left.Features = matrix.GetSubSetByIndex(data.Features, leftIndices)
+		left.Target = matrix.GetSubSetByIndex(data.Target, leftIndices)
+		right.Features = matrix.GetSubSetByIndex(data.Features, rightIndices)
+		right.Target = matrix.GetSubSetByIndex(data.Target, rightIndices)
+		score = scoreSplit(left, right, criteria)
+		if score < bestScore {
+			res = splitResults{
+				score:      score,
+				colIndex:   colIndex,
+				splitValue: splitValue,
+				leftData:   left,
+				rightData:  right,
+			}
+			bestScore = score
+		}
+	}
+	return
 }
 
 func scoreSplit(left, right ml.DataSet, criteria splitCriteria) (score float64) {
