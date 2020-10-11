@@ -3,6 +3,7 @@ package matrix
 import (
 	"errors"
 	"fmt"
+	"math"
 )
 
 type matrix interface {
@@ -222,5 +223,27 @@ func GetSubSetByColIndex(X *DenseMatrix, indices []int) (res *DenseMatrix) {
 	Xnew := X.Tranpose()
 	tempRes := GetSubSetByIndex(Xnew, indices)
 	res = tempRes.Tranpose()
+	return
+}
+
+// MinMax returns the maximum and minimum value for each column
+func (m *DenseMatrix) MinMax() (minArray, maxArray []float64) {
+	cols, _ := m.Dims()
+	minArray = make([]float64, cols)
+	maxArray = make([]float64, cols)
+	for rowIndex, rowVector := range m.Rows {
+		for colIndex, colValue := range rowVector.Values {
+			if rowIndex == 0 {
+				maxArray[colIndex] = math.Inf(-1)
+				minArray[colIndex] = math.Inf(1)
+			}
+			if maxArray[colIndex] < colValue {
+				maxArray[colIndex] = colValue
+			}
+			if minArray[colIndex] > colValue {
+				minArray[colIndex] = colValue
+			}
+		}
+	}
 	return
 }

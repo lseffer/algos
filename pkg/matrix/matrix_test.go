@@ -155,3 +155,13 @@ func TestGetSubSetByIndex(t *testing.T) {
 	res2 := GetSubSetByIndex(&testMat, []int{0})
 	assert.Equal(t, &DenseMatrix{Rows: []*Vector{&mRow1}}, res2)
 }
+
+func TestMinMax(t *testing.T) {
+	var mRow1 = Vector{Values: []float64{1, 1, 11}}
+	var mRow2 = Vector{Values: []float64{10, 4, 6}}
+	var mRow3 = Vector{Values: []float64{4, 5, 8}}
+	var testMat = DenseMatrix{Rows: []*Vector{&mRow1, &mRow2, &mRow3}}
+	minRes, maxRes := testMat.MinMax()
+	assert.Equal(t, []float64{10, 5, 11}, maxRes)
+	assert.Equal(t, []float64{1, 1, 6}, minRes)
+}
